@@ -88,3 +88,5 @@ class Av(Base, ParametersAd):
 engine = create_engine('sqlite+aiosqlite:///examplel.sqlite3', echo=True)
 
 Base.metadata.create_all(engine)
+
+
