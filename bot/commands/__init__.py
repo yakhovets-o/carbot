@@ -21,12 +21,16 @@ def register_client_command(router: Router) -> None:
 
 def register_client_command_fsm(router: Router) -> None:
     router.message.register(param_search, StateFilter(None), Command('begin'))
+
     router.message.register(car_cancel, StateFilter('*'), Command('break'))
     router.message.register(car_cancel, StateFilter('*'), F.text.casefold() == 'break')
+
     router.message.register(car_message, StateFilter(ParamSearch.car))
     router.callback_query.register(car_choice, StateFilter(ParamSearch.car))
+
     router.message.register(car_message, StateFilter(ParamSearch.currency))
     router.callback_query.register(currency_car, StateFilter(ParamSearch.currency))
+
     router.message.register(car_price_start, StateFilter(ParamSearch.min_price))
     router.message.register(car_price_finish, StateFilter(ParamSearch.max_price))
     router.message.register(car_tracking_date, StateFilter(ParamSearch.tracking_date))

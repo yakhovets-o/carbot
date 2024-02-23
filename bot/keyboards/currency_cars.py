@@ -8,3 +8,4 @@ cur_car_kb = InlineKeyboardMarkup(
          ]
     ]
 )
+

@@ -45,10 +45,10 @@ class Av:
                 request = requests.get(url=url, params=params, headers=headers, cookies=cookies)
 
                 count_page = int(request.json()['pageCount'])
-                url = request.url
+                response = request.url
 
                 self.page_count.setdefault(type_car, count_page)
-                self.urls.setdefault(type_car, url)
+                self.urls.setdefault(type_car, response)
 
                 time.sleep(5)
             # return self.urls, self.page_count
