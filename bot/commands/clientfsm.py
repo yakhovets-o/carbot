@@ -115,7 +115,7 @@ async def car_tracking_date(message: types.Message, state: FSMContext):
     tracking_date_str = message.text
 
     try:
-        date = datetime.strptime(tracking_date_str, '%d.%m.%y %H:%M')
+        date = str(datetime.strptime(tracking_date_str, '%d.%m.%y %H:%M'))
     except Exception:
         await message.answer(
             text=f'📅<b><i>Введте дату в формате  ДД.ММ.ГГ ЧЧ:MM (например, {datetime.now().strftime("%d.%m.%y %H:%M")})</i></b>\n\n'

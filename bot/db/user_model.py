@@ -24,6 +24,6 @@ class User(Base):
     price_max: Mapped[int]
 
     update_period_min: Mapped[int] = mapped_column(default=10)
-    tracking_date: Mapped[DateTime] = mapped_column(DateTime, default=func.now())
+    tracking_date: Mapped[str]
 
 

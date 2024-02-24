@@ -8,7 +8,7 @@ from commands import register_client_command, register_client_command_fsm, regis
 from db.engine import create_db, session_maker
 
 from bot.middlewares.db import DataBaseSession
-from bot.config import dp, bot
+from bot.config import bot, dp
 from bot.common.bot_cmd_lst import bot_cmd_lst
 
 
