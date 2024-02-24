@@ -1,12 +1,15 @@
 import asyncio
 import logging
 
+from aiogram.types import BotCommandScopeAllPrivateChats
+
 from commands import register_client_command, register_client_command_fsm, register_client_command_other
 
 from db.engine import create_db, session_maker
 
 from bot.middlewares.db import DataBaseSession
 from bot.config import dp, bot
+from bot.common.bot_cmd_lst import bot_cmd_lst
 
 
 async def main() -> None:
@@ -19,6 +22,7 @@ async def main() -> None:
     dp.update.middleware(DataBaseSession(session_pool=session_maker))
 
     await create_db()
+    await bot.set_my_commands(commands=bot_cmd_lst, scope=BotCommandScopeAllPrivateChats())
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
