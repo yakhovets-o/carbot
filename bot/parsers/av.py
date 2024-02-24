@@ -2,35 +2,23 @@ import datetime
 import time
 
 import requests
+from requests.exceptions import RequestException
 
-from bot.parsers import cookies, headers
+
+from bot.parsers.base_pars import BaseParser
 
 
-class Av:
+class Av(BaseParser):
 
-    def __init__(self,
-                 tg_id: int = 6165,
-                 cars: bool = 1,
-                 truck_cars: bool = 1,
-                 currency: str = 'Usd',
-                 price_min: int = 0,
-                 price_max: int = 300,
-                 update_period_min: int = 20,
-                 tracking_date: str = '2024-02-21 16:05:00') -> None:
-
-        self.tg_id = tg_id
-        self.cars = cars
-        self.truck_cars = truck_cars
-        self.currency = currency
-        self.price_min = price_min
-        self.price_max = price_max
-        self.update_period_min = update_period_min
-        self.tracking_date = datetime.datetime.strptime(tracking_date, '%Y-%m-%d %H:%M:%S')
+    def __init__(self) -> None:
+        super().__init__()
 
         self.page_count = {}
         self.urls = {}
 
-    def get_url(self):
+        self._get_url()
+
+    def _get_url(self) -> dict | RequestException:
 
         if self.currency == 'Br':
             params = {'price_byn[min]': self.price_min, 'price_byn[max]': self.price_max, 'sort': 4}
@@ -42,7 +30,7 @@ class Av:
         try:
             for type_car in type_cars:
                 url = f'https://api.av.by/offer-types/{type_car}/filters/main/init?'
-                request = requests.get(url=url, params=params, headers=headers, cookies=cookies)
+                request = requests.get(url=url, params=params, headers=self.HEADERS)
 
                 count_page = int(request.json()['pageCount'])
                 response = request.url
@@ -50,36 +38,30 @@ class Av:
                 self.page_count.setdefault(type_car, count_page)
                 self.urls.setdefault(type_car, response)
 
-                time.sleep(5)
-            # return self.urls, self.page_count
+                time.sleep(2)
+
         except requests.exceptions.RequestException as errex:
             return errex
 
     @staticmethod
-    def get_time_post(time_post: str) -> datetime:
-        time_post_obj = datetime.datetime.strptime(time_post.replace('T', ' ').split('+')[0], '%Y-%m-%d %H:%M:%S') + \
+    def _get_date_ad(date: str) -> datetime:
+        time_post_obj = datetime.datetime.strptime(date.replace('T', ' ').split('+')[0], '%Y-%m-%d %H:%M:%S') + \
                         datetime.timedelta(hours=3)
 
         return time_post_obj
 
-    def ads_cars(self):
-
-        url_cars = self.urls.get('cars', False)
-        pages = self.page_count.get('cars', 0)
-
-        if not url_cars:
-            return f'По вашим параметрам объявлений не обнаружено'
+    def _get_ads_cars(self, pages: int, url_cars: str) -> tuple | RequestException:
 
         try:
             for page in range(1, pages + 1):
-                page_url = requests.get(url=url_cars, params={'page': page}, headers=headers, cookies=cookies)
+                page_url = requests.get(url=url_cars, params={'page': page}, headers=self.HEADERS)
 
-                time.sleep(5)
+                time.sleep(2)
 
                 cars = page_url.json()
 
                 for car in cars['adverts']:
-                    publ_ads = self.get_time_post(car['refreshedAt'])
+                    publ_ads = self._get_date_ad(car['refreshedAt'])
                     if publ_ads > self.tracking_date:
                         brand = car['metadata']['brandSlug']
                         model = car['metadata']['modelSlug']
@@ -102,7 +84,23 @@ class Av:
         except requests.exceptions.RequestException as errex:
             return errex
 
+    def get_cars(self):
+        url_cars = self.urls.get('cars', False)
+        pages = self.page_count.get('cars', 0)
+
+        if not url_cars:
+            return f'По вашим параметрам объявлений не обнаружено'
+        return self._get_ads_cars(pages=pages, url_cars=url_cars)
+
+    def get_truck_cars(self):
+        url_cars = self.urls.get('truck_cars', False)
+        pages = self.page_count.get('truck_cars', 0)
+
+        if not url_cars:
+            return f'По вашим параметрам объявлений не обнаружено'
+        return self._get_ads_cars(pages=pages, url_cars=url_cars)
+
 
 av = Av()
-print(av.get_url())
-print(av.ads_cars())
+print(av.get_cars())
+print(av.get_truck_cars())

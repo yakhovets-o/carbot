@@ -17,7 +17,7 @@ async def contacts(message: types.Message) -> None:
     await message.answer(text=f'<b>Admin:</b> {os.getenv("admin")}')
 
 
-async def support(message: types.Message) -> None:
+async def supports(message: types.Message) -> None:
     await message.answer(text=f'<b>Поддержка бота:</b>  {os.getenv("support")}')
 
 
