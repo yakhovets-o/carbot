@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from bot.db.user_model import Base
+from bot.db.models import Base
 
 engine = create_async_engine(url='sqlite+aiosqlite:///examplel.sqlite3', echo=True)
 

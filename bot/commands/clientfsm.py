@@ -6,7 +6,7 @@ from aiogram import types
 
 from bot.keyboards.type_cars import type_car_kb
 from bot.keyboards.currency_cars import cur_car_kb
-from bot.db.crud_user import add_params
+from bot.db.orm_query import add_params
 
 from sqlalchemy.ext.asyncio import AsyncSession
 

@@ -3,10 +3,9 @@ import logging
 
 from aiogram.types import BotCommandScopeAllPrivateChats
 
-from commands import register_client_command, register_client_command_fsm, register_client_command_other
 
-from db.engine import create_db, session_maker
-
+from bot.db.engine import create_db, session_maker
+from bot.commands import register_client_command, register_client_command_fsm, register_client_command_other
 from bot.middlewares.db import DataBaseSession
 from bot.config import bot, dp
 from bot.common.bot_cmd_lst import bot_cmd_lst
