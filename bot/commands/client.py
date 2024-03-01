@@ -55,6 +55,7 @@ async def get(message: types.Message, session: AsyncSession):
     if params_value is None:
         await message.answer('Для получения результатов, укажите критерии поиска')
     else:
+        # create av obj scraper
         # av = Av(params_value.tg_id,
         #         params_value.cars,
         #         params_value.truck_cars,
@@ -64,11 +65,12 @@ async def get(message: types.Message, session: AsyncSession):
         #         params_value.update_period_min,
         #         params_value.tracking_date
         #         )
-        #
+        # # start av scraper
         # await av.create_task()
-
+        # result av scraper
         ads_av = await OrmQuery.get_ads_av(session=session, tg_id=tg_id)
 
+        # create kufar obj scraper
         # kufar = Kufar(params_value.tg_id,
         #               params_value.cars,
         #               params_value.truck_cars,
@@ -78,10 +80,13 @@ async def get(message: types.Message, session: AsyncSession):
         #               params_value.update_period_min,
         #               params_value.tracking_date
         #               )
+        # # start kufar scraper
         # await kufar.create_task()
 
+        # result kufar scraper
         ads_kufar = await OrmQuery.get_ads_kufar(session=session, tg_id=tg_id)
 
+        # kufar + av result
         ads_av_kufar = ads_av + ads_kufar
         print(ads_av_kufar, '~~~~~~~~~~~~~~~~~~~~~~~~~~~~', type(ads_av_kufar))
         if ads_av_kufar:
@@ -97,8 +102,11 @@ async def get(message: types.Message, session: AsyncSession):
                 await message.answer(card)
             await message.answer('Поиск завершен.')
 
+            # del av table
             await OrmQuery.dell_ads_av(session=session, tg_id=tg_id)
+            # del kufar table
             await OrmQuery.dell_ads_kufar(session=session, tg_id=tg_id)
+            # update search parameters
             await OrmQuery.update_period_user(session=session, tg_id=tg_id)
 
         else:

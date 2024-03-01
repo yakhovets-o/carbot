@@ -49,6 +49,7 @@ class Av(DataClass):
                                        'tg_id': self.tg_id}
                         print(properties, sep='\n')
                         print('-------------------------------------------------------------------------------')
+                        # av table
                         await OrmQuery.add_av_ads(data=properties)
                     else:
                         continue

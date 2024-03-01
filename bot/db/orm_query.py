@@ -100,6 +100,7 @@ class OrmQuery:
 
     @staticmethod
     async def update_period_user(session: AsyncSession, tg_id: int) -> None:
+        # format column tracking_date in table str
         update_tracking_date = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
         query = update(User).where(User.tg_id == tg_id).values(tracking_date=update_tracking_date)
         await session.execute(query)

@@ -1,4 +1,3 @@
-import time
 import datetime
 
 import aiohttp
@@ -8,8 +7,6 @@ from typing import NoReturn
 
 from bot.scrapers.abc_data_class_scraper import AbcDataClassScraper as DataClass
 from bot.db.orm_query import OrmQuery
-
-start = time.perf_counter()
 
 
 class Kufar(DataClass):
@@ -67,6 +64,7 @@ class Kufar(DataClass):
 
                         print(properties, sep='\n')
                         print('-----------------------------------------')
+                        # table kufar
                         await OrmQuery.add_kufar_ads(data=properties)
                     else:
                         continue
@@ -106,10 +104,3 @@ class Kufar(DataClass):
             raise cce
         except Exception as ex:
             raise ex
-
-# kufar = Kufar()
-# asyncio.run(kufar._create_task())
-#
-# finish = time.perf_counter()
-#
-# print(finish - start)
