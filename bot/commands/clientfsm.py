@@ -6,7 +6,7 @@ from aiogram import types
 
 from bot.keyboards.type_cars import type_car_kb
 from bot.keyboards.currency_cars import cur_car_kb
-from bot.db.orm_query import add_params
+from bot.db.orm_query import OrmQuery
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -156,5 +156,5 @@ async def update_period_min(message: types.Message, state: FSMContext, session: 
                              f'<b>Для отмены поиска вызовите команду</b> /break'
                              )
 
-        await add_params(session=session, data=data)
+        await OrmQuery.add_or_update_params(session=session, data=data)
         await state.clear()

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "carbot"
-version = "0.1.0"
+version = "1.0.0"
 description = ""
 authors = ["yakhovets-o <yakhovetso@gmail.com>"]
 readme = "README.md"
@@ -16,6 +16,7 @@ aiosqlite = "^0.19.0"
 python-dotenv = "^1.0.1"
 redis = "^5.0.1"
 aioredis = "^2.0.1"
+fake-useragent = "^1.4.0"
 
 
 [build-system]

@@ -1,22 +1,27 @@
 import datetime
+
+from fake_useragent import UserAgent
+
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 
 
 @dataclass()
 class AbcDataClassScraper(ABC):
-    tg_id: int = 504152069
-    cars: bool = 1
-    truck_cars: bool = 1
-    currency: str = 'Usd'
-    price_min: int = 100
-    price_max: int = 600
-    update_period_min: int = 10
-    tracking_date: datetime = datetime.datetime.strptime('2024-02-20 23:17:00', '%Y-%m-%d %H:%M:%S')
+    tg_id: int
+    cars: bool
+    truck_cars: bool
+    currency: str
+    price_min: int
+    price_max: int
+    update_period_min: int
+    tracking_date: str
 
     type_cars: set = field(init=False, repr=False)
     type_currency: str = field(init=False)
     params: dict = field(init=False, repr=False)
+
+    __user_agent = UserAgent().random
 
     def __post_init__(self):
         if self.__class__.__name__ == 'Av':
@@ -44,7 +49,7 @@ class AbcDataClassScraper(ABC):
                 self.price_max = self.price_max * 100
 
     HEADERS = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0',
+        'User-Agent': __user_agent,
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
         'Accept-Language': 'ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3',
 
@@ -71,5 +76,8 @@ class AbcDataClassScraper(ABC):
         raise NotImplementedError('the _get_ads method is not defined in the class')
 
     @abstractmethod
-    def _create_task(self) -> NotImplemented:
+    def create_task(self) -> NotImplemented:
         raise NotImplementedError('the _create_task method is not defined in the class')
+
+
+

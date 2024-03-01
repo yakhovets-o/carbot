@@ -6,12 +6,14 @@ import aiohttp
 
 from typing import NoReturn
 
-from bot.scrapers.abc_data_class_scraper import AbcDataClassScraper
+from bot.scrapers.abc_data_class_scraper import AbcDataClassScraper as DataClass
+from bot.db.orm_query import OrmQuery
 
-start = time.perf_counter()
+
+# start = time.perf_counter()
 
 
-class Av(AbcDataClassScraper):
+class Av(DataClass):
 
     @staticmethod
     async def _get_date_ad(date: str) -> datetime:
@@ -30,28 +32,24 @@ class Av(AbcDataClassScraper):
         return properties_car
 
     async def _get_ads(self, session: aiohttp.ClientSession, page_url: str) -> None | NoReturn:
+        tracking_date = datetime.datetime.strptime(self.tracking_date, '%Y-%m-%d %H:%M:%S')
         try:
             async with session.get(url=page_url, headers=self.HEADERS) as response:
-                cars = await response.json()
+                ads = await response.json()
                 await asyncio.sleep(1)
                 print(response.url)
 
-                for car in cars['adverts']:
-
-                    date_ad = await self._get_date_ad(car['refreshedAt'])
-                    if date_ad > self.tracking_date:
-                        properties = await self._get_properties_ad(car['properties'])
-
-                        region = car['locationName']
-                        city = car['shortLocationName']
-
-                        price_br = car['price']['byn']['amount']
-                        price_usd = car['price']['usd']['amount']
-
-                        link = car['publicUrl']
-                        print(properties, region, city, price_usd, price_br, link, date_ad,
-                              sep='\n')
+                for ad in ads['adverts']:
+                    date_ad = await self._get_date_ad(ad['refreshedAt'])
+                    if date_ad > tracking_date:
+                        properties = await self._get_properties_ad(ad['properties'])
+                        properties |= {'region': ad['locationName'], 'city': ad['shortLocationName'],
+                                       'price_br': ad['price']['byn']['amount'], 'date_time_ad': date_ad,
+                                       'price_usd': ad['price']['usd']['amount'], 'link': ad['publicUrl'],
+                                       'tg_id': self.tg_id}
+                        print(properties, sep='\n')
                         print('-------------------------------------------------------------------------------')
+                        await OrmQuery.add_av_ads(data=properties)
                     else:
                         continue
         except aiohttp.ClientConnectionError as cce:
@@ -59,23 +57,22 @@ class Av(AbcDataClassScraper):
         except Exception as ex:
             raise ex
 
-    async def _create_task(self) -> None | NoReturn:
+    async def create_task(self) -> None | NoReturn:
         try:
             async with aiohttp.ClientSession() as session:
                 tasks = []
                 for type_car in self.type_cars:
                     type_car_url = f'https://api.av.by/offer-types/{type_car}/filters/main/init?'
-
                     response = await session.get(url=type_car_url, params=self.params, headers=self.HEADERS)
                     await asyncio.sleep(1)
 
                     response_json = await response.json()
                     url = response.url
-                    print(url)
-                    count_pages = int(response_json['pageCount'])
 
+                    count_pages = int(response_json['pageCount'])
                     for page in range(1, count_pages + 1):
                         page_url = str(url) + f'&page={page}'
+
                         task = asyncio.create_task(self._get_ads(session=session, page_url=page_url))
                         tasks.append(task)
 
@@ -85,12 +82,11 @@ class Av(AbcDataClassScraper):
         except Exception as ex:
             raise ex
 
-
-av = Av()
-asyncio.run(av._create_task())
-
-finish = time.perf_counter()
-
-print(finish - start)
-
-# 3.6007565000327304
+# av = Av()
+# asyncio.run(av._create_task())
+#
+# finish = time.perf_counter()
+#
+# print(finish - start)
+#
+# # 3.6007565000327304

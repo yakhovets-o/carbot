@@ -1,12 +1,16 @@
 import os
+import asyncio
 
 from aiogram import types
+from aiogram.utils.markdown import hbold, hlink
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.db.orm_query import get_params_user
+from bot.db.orm_query import OrmQuery
+from bot.db.models import User
 
 from bot.scrapers.av import Av
+from bot.scrapers.kufar import Kufar
 
 
 async def start(message: types.Message) -> None:
@@ -46,26 +50,63 @@ async def get(message: types.Message, session: AsyncSession):
     await message.answer('Пожалуйста подождите...')
     tg_id = message.from_user.id
 
-    params_value = await get_params_user(session=session, tg_id=tg_id)
-    params_key = ('tg_id', 'cars', 'truck_cars', 'currency',
-                  'price_min', 'price_max', 'update_period_min', 'tracking_date')
+    params_value: User = await OrmQuery.get_params_user(session=session, tg_id=tg_id)
 
-    params_dict = dict(zip(params_key, params_value[0]))
+    if params_value is None:
+        await message.answer('Для получения результатов, укажите критерии поиска')
+    else:
+        # av = Av(params_value.tg_id,
+        #         params_value.cars,
+        #         params_value.truck_cars,
+        #         params_value.currency,
+        #         params_value.price_min,
+        #         params_value.price_max,
+        #         params_value.update_period_min,
+        #         params_value.tracking_date
+        #         )
+        #
+        # await av.create_task()
 
-    tg_id = params_dict['tg_id']
-    cars = params_dict['cars']
-    truck_cars = params_dict['truck_cars']
-    currency = params_dict['currency']
-    price_min = params_dict['price_min']
-    price_max = params_dict['price_max']
-    update_period_min = params_dict['update_period_min']
-    tracking_date = params_dict['tracking_date']
+        ads_av = await OrmQuery.get_ads_av(session=session, tg_id=tg_id)
 
-    av  = Av()
-    print(av)
+        # kufar = Kufar(params_value.tg_id,
+        #               params_value.cars,
+        #               params_value.truck_cars,
+        #               params_value.currency,
+        #               params_value.price_min,
+        #               params_value.price_max,
+        #               params_value.update_period_min,
+        #               params_value.tracking_date
+        #               )
+        # await kufar.create_task()
+
+        ads_kufar = await OrmQuery.get_ads_kufar(session=session, tg_id=tg_id)
+
+        ads_av_kufar = ads_av + ads_kufar
+        print(ads_av_kufar, '~~~~~~~~~~~~~~~~~~~~~~~~~~~~', type(ads_av_kufar))
+        if ads_av_kufar:
+            for ad in ads_av_kufar:
+                card = f'{hbold("Марка и модель: ")} {hlink((ad.brand + " " + ad.model), ad.link)}\n' \
+                       f'{hbold("Состояние: ")} {ad.condition}\n' \
+                       f'{hbold("Год: ")} {ad.year}\n' \
+                       f'{hbold("Тип двигателя и объем: ")} {ad.engine_type}, {ad.engine_capacity}\n' \
+                       f'{hbold("Дата и место публикации: ")} {ad.date_time_ad}, {ad.region}, {ad.city}\n' \
+                       f'{hbold("Цена: ")} Br {ad.price_br}, Usd {ad.price_usd}'
+
+                await asyncio.sleep(1)
+                await message.answer(card)
+            await message.answer('Поиск завершен.')
+
+            await OrmQuery.dell_ads_av(session=session, tg_id=tg_id)
+            await OrmQuery.dell_ads_kufar(session=session, tg_id=tg_id)
+            await OrmQuery.update_period_user(session=session, tg_id=tg_id)
+
+        else:
+            await message.answer('По вашему запросу объявлений не обнаружено.\n'
+                                 'Обновите параметры поиска командой \n/begin')
 
 
 async def mess_other(message: types.Message) -> None:
     await message.answer(f'Команда некорректна\n'
-                         f'Список команд можно получить по команде /help')
+                         f'Список команд можно получить по команде \n/help')
     await message.delete()

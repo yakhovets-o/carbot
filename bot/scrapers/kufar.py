@@ -6,12 +6,13 @@ import asyncio
 
 from typing import NoReturn
 
-from bot.scrapers.abc_data_class_scraper import AbcDataClassScraper
+from bot.scrapers.abc_data_class_scraper import AbcDataClassScraper as DataClass
+from bot.db.orm_query import OrmQuery
 
 start = time.perf_counter()
 
 
-class Kufar(AbcDataClassScraper):
+class Kufar(DataClass):
 
     @staticmethod
     async def _get_price_usd(price_usd: str) -> int:
@@ -28,7 +29,7 @@ class Kufar(AbcDataClassScraper):
     @staticmethod
     async def _get_properties_ad(properties: str) -> dict:
         properties_car = dict.fromkeys(('Марка', 'Модель', 'Год', 'Тип двигателя',
-                                        'Объем, л', 'Область', 'Город / Район'), 'НЕ указано')
+                                        'Объем, л', 'Область', 'Город / Район', 'Состояние'), 'НЕ указано')
 
         for prop in properties:
             if prop['pl'] in properties_car:
@@ -45,24 +46,28 @@ class Kufar(AbcDataClassScraper):
         return date_obj
 
     async def _get_ads(self, session: aiohttp.ClientSession, page_url: str) -> None | NoReturn:
+        tracking_date = datetime.datetime.strptime(self.tracking_date, '%Y-%m-%d %H:%M:%S')
         try:
             async with session.get(url=page_url, headers=self.HEADERS) as response:
-                cars = await response.json()
+                ads = await response.json()
                 await asyncio.sleep(1)
                 print(response.url)
 
-                for car in cars['ads']:
+                for ad in ads['ads']:
 
-                    date_ad = await self._get_date_ad(car['list_time'])
-                    if date_ad > self.tracking_date:
-                        properties = await self._get_properties_ad(car['ad_parameters'])
+                    date_ad = await self._get_date_ad(ad['list_time'])
+                    if date_ad > tracking_date:
+                        properties = await self._get_properties_ad(ad['ad_parameters'])
 
-                        price_br = await self._get_price_br(car['price_byn'])
-                        price_usd = await self._get_price_usd(car['price_usd'])
+                        price_br = await self._get_price_br(ad['price_byn'])
+                        price_usd = await self._get_price_usd(ad['price_usd'])
 
-                        link = car['ad_link']
-                        print(properties, price_br, price_usd, link, sep='\n')
+                        properties |= {'link': ad['ad_link'], 'date_time_ad': date_ad, 'price_usd': price_usd,
+                                       'price_br': price_br, 'tg_id': self.tg_id}
+
+                        print(properties, sep='\n')
                         print('-----------------------------------------')
+                        await OrmQuery.add_kufar_ads(data=properties)
                     else:
                         continue
         except aiohttp.ClientConnectionError as cce:
@@ -70,7 +75,7 @@ class Kufar(AbcDataClassScraper):
         except Exception as ex:
             raise ex
 
-    async def _create_task(self) -> None | NoReturn:
+    async def create_task(self) -> None | NoReturn:
         url = f'https://api.kufar.by/search-api/v1/search/rendered-paginated?' \
               f'prc=r%3A{self.price_min}%2C{self.price_max}'
 
@@ -80,7 +85,6 @@ class Kufar(AbcDataClassScraper):
 
                 for type_car in self.type_cars:
                     type_car_url = url + f'&cat={type_car}'
-
                     response = await session.get(url=type_car_url, params=self.params, headers=self.HEADERS)
                     await asyncio.sleep(1)
 
@@ -103,10 +107,9 @@ class Kufar(AbcDataClassScraper):
         except Exception as ex:
             raise ex
 
-
-kufar = Kufar()
-asyncio.run(kufar._create_task())
-
-finish = time.perf_counter()
-
-print(finish - start)
+# kufar = Kufar()
+# asyncio.run(kufar._create_task())
+#
+# finish = time.perf_counter()
+#
+# print(finish - start)
