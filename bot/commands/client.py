@@ -1,7 +1,7 @@
 import os
 import asyncio
 
-from aiogram import types
+from aiogram import types, Bot
 from aiogram.utils.markdown import hbold, hlink
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,6 +11,9 @@ from bot.db.models import User
 
 from bot.scrapers.av import Av
 from bot.scrapers.kufar import Kufar
+
+from arq import ArqRedis
+from datetime import timedelta
 
 
 async def start(message: types.Message) -> None:
@@ -24,8 +27,10 @@ async def start(message: types.Message) -> None:
     await message.answer(text=text)
 
 
-async def contacts(message: types.Message) -> None:
-    await message.answer(text=f'<b>Admin:</b> {os.getenv("admin")}')
+async def contacts(message: types.Message, bot: Bot) -> None:
+    # await message.answer(text=f'<b>Admin:</b> {os.getenv("admin")}')
+    await bot.send_message(chat_id=message.from_user.id, text=f'<b>Admin:</b> {os.getenv("admin")}')
+    # await arqredis.enqueue_job('send', _defer_by=timedelta(seconds=10), chat_id=message.from_user.id, text='Tdgfbg')
 
 
 async def supports(message: types.Message) -> None:
