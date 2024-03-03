@@ -1,28 +1,26 @@
 from datetime import datetime
 
 from sqlalchemy import select, delete, update
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot.db.models import User, Av, Kufar
-
 from bot.db.engine import session_maker
 
 
 class OrmQuery:
     @staticmethod
-    async def add_or_update_params(data: dict) -> None:
-        async with session_maker() as session:
-            params = User(
-                tg_id=data['user_id'],
-                cars=data.get('cars', False),
-                truck_cars=data.get('truck_cars', False),
-                currency=data['currency'],
-                price_min=data['price_min'],
-                price_max=data['price_max'],
-                update_period_min=data['update_period_min'],
-                tracking_date=data['tracking_date']
-            )
-            await session.merge(params)
-            await session.commit()
+    async def add_or_update_params(session: AsyncSession, data: dict) -> None:
+        params = User(
+            tg_id=data['user_id'],
+            cars=data.get('cars', False),
+            truck_cars=data.get('truck_cars', False),
+            currency=data['currency'],
+            price_min=data['price_min'],
+            price_max=data['price_max'],
+            tracking_date=data['tracking_date']
+        )
+        await session.merge(params)
+        await session.commit()
 
     @staticmethod
     async def add_kufar_ads(data: dict) -> None:
