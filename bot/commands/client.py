@@ -1,20 +1,11 @@
 import os
-import asyncio
 
-from aiogram import types, Bot
-from aiogram.utils.markdown import hbold, hlink
-
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from bot.db.orm_query import OrmQuery
-from bot.db.models import User
-
-from bot.scrapers.av import Av
-from bot.scrapers.kufar import Kufar
+from aiogram import types
 
 from arq import ArqRedis
+
 from datetime import timedelta
-import aiogram.utils.markdown as fmt
+
 
 async def start(message: types.Message) -> None:
     your_name = message.from_user.full_name
@@ -53,7 +44,8 @@ async def get(message: types.Message, arqredis: ArqRedis) -> None:
     await message.answer('Пожалуйста подождите...')
     tg_id = message.from_user.id
 
-    await arqredis.enqueue_job('get', _defer_by=timedelta(seconds=10), tg_id=tg_id)
+    # background task path  bot/scheduler
+    await arqredis.enqueue_job('get', _defer_by=timedelta(seconds=5), tg_id=tg_id)
 
 
 async def mess_other(message: types.Message) -> None:

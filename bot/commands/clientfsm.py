@@ -1,8 +1,8 @@
 from datetime import datetime
 
+from aiogram import types
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
-from aiogram import types
 
 from bot.keyboards.type_cars import type_car_kb
 from bot.keyboards.currency_cars import cur_car_kb
@@ -126,7 +126,6 @@ async def car_tracking_date(message: types.Message, state: FSMContext, session: 
         await state.update_data(user_id=message.from_user.id)
 
         data = await state.get_data()
-        print(data)
 
         cars = 'Выбрано' if data.get("cars", False) else 'Не выбрано'
         truck_cars = 'Выбрано' if data.get("truck_cars", False) else 'Не выбрано'
@@ -143,5 +142,6 @@ async def car_tracking_date(message: types.Message, state: FSMContext, session: 
                              f'<b>Для отмены поиска вызовите команду</b> /break'
                              )
 
+        # User table
         await OrmQuery.add_or_update_params(session=session, data=data)
         await state.clear()
