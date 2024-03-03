@@ -1,30 +1,29 @@
-from aiogram import Bot
-import os
-
-from arq.connections import RedisSettings
-
-from bot.db.orm_query import OrmQuery
-from bot.db.models import User
-
-import aiogram.utils.markdown as fmt
 import asyncio
+import aiogram.utils.markdown as fmt
 
+from aiogram import Bot
+
+from bot.config import BotConfig, RedisConfig
+from bot.db.orm_query import OrmQuery
 from bot.scrapers.av import Av
 from bot.scrapers.kufar import Kufar
 
 
+# init bot to send background task
 async def startup(ctx):
-    ctx['bot'] = Bot(token='6210880019:AAHItwAko076rF_hnv2GP3bvk5lBRL4Mru4')
+    ctx['bot'] = Bot(token=BotConfig.token)
 
 
 async def shutdown(ctx):
     await ctx['bot'].session.aclose()
 
 
+# background task
 async def get(ctx, tg_id: int):
     bot: Bot = ctx['bot']
 
-    params_value: User = await OrmQuery.get_params_user(tg_id=tg_id)
+    # get params for scraper User table
+    params_value = await OrmQuery.get_params_user(tg_id=tg_id)
 
     if params_value is None:
         await bot.send_message(tg_id, text='Для получения результатов, укажите критерии поиска')
@@ -77,7 +76,7 @@ async def get(ctx, tg_id: int):
                 await asyncio.sleep(1)
                 await bot.send_message(tg_id, text=card, parse_mode='HTML')
 
-            await bot.send_message(tg_id, text='Поиск завершен.')
+            await bot.send_message(tg_id, text=fmt.hitalic('Поиск завершен.'))
 
             # del av table
             await OrmQuery.dell_ads_av(tg_id=tg_id)
@@ -87,12 +86,18 @@ async def get(ctx, tg_id: int):
             await OrmQuery.update_period_user(tg_id=tg_id)
 
         else:
-            await bot.send_message(tg_id, text='По вашему запросу объявлений не обнаружено.\n'
-                                               'Обновите параметры поиска командой \n/begin')
+            await bot.send_message(tg_id, text=fmt.text(
+                fmt.text(fmt.hitalic('По вашему запросу объявлений не обнаружено.')),
+                fmt.text(fmt.hitalic('Обновите параметры поиска командой'), fmt.hbold(' /begin')),
+                sep='\n\n'
+            ), parse_mode='HTML'
+                                   )
 
 
+# it is executed in a separate thread
+# path  arq bot.scheduler.scheduler.WorkerSettings
 class WorkerSettings:
-    redis_setting = RedisSettings()
+    redis_setting = RedisConfig.pool_settings
     on_startup = startup
     on_shutdown = shutdown
     functions = [get]
