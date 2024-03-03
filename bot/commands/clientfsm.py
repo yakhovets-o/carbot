@@ -1,3 +1,5 @@
+import aiogram.utils.markdown as fmt
+
 from datetime import datetime
 
 from aiogram import types
@@ -6,7 +8,6 @@ from aiogram.fsm.context import FSMContext
 
 from bot.keyboards.type_cars import type_car_kb
 from bot.keyboards.currency_cars import cur_car_kb
-
 from bot.db.orm_query import OrmQuery
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,7 +22,7 @@ class ParamSearch(StatesGroup):
 
 
 async def param_search(message: types.Message, state: FSMContext):
-    await message.answer(text='<b><i>выберите авто:</i></b>', reply_markup=type_car_kb)
+    await message.answer(text=fmt.hitalic('Выберите авто:'), reply_markup=type_car_kb)
     await state.set_state(ParamSearch.car)
 
 
@@ -31,12 +32,16 @@ async def car_cancel(message: types.Message, state: FSMContext):
         return
 
     await state.clear()
-    await message.answer(text='<i>Действие отменено.</i>')
+    await message.answer(text=fmt.hitalic('Действие отменено.'))
 
 
 async def car_message(message: types.Message):
-    await message.answer(text=f'🔨 <b><i>Укажите что то из предложенных вариантов\n\n'
-                              f'Для отмены поиска вызовите команду</i></b> /break')
+    text = fmt.text(
+        fmt.text(fmt.hitalic('Укажите что то из предложенных вариантов')),
+        fmt.text(fmt.hbold('/break '), fmt.hitalic('Для отмены поиска')),
+        sep='\n\n'
+    )
+    await message.answer(text=text)
     await message.delete()
 
 
@@ -49,15 +54,23 @@ async def car_choice(call: types.CallbackQuery, state: FSMContext):
     if call.data == 'Лекговое авто / Грузовое авто':
         await state.update_data(cars=True)
         await state.update_data(truck_cars=True)
-    data = await state.get_data()
-    cars = 'Выбрано' if data.get("cars", False) else 'Не выбрано'
-    truck_cars = 'Выбрано' if data.get("truck_cars", False) else 'Не выбрано'
 
-    await call.message.answer(text=f'<i>Легковое авто - {cars}\nГрузовое авто - {truck_cars}.</i>\n\n'
-                                   f'<b>Для отмены поиска вызовите команду</b> /break')
+    data = await state.get_data()
+    car = 'Легкое авто' if data.get("cars", False) else 'Грузовое авто'
+    truck_car = 'Грузовое авто' if data.get("truck_cars", False) else 'Легкое авто'
+    join_cars = ', '.join({car, truck_car})
+    await state.update_data(join_cars=join_cars)
+    data = await state.get_data()
+
+    text = fmt.text(
+        fmt.text(fmt.hitalic('Авто: ', data.get('join_cars'))),
+        fmt.text(fmt.hbold('/break '), fmt.hitalic('Для отмены поиска')),
+        sep='\n\n'
+    )
+    await call.message.answer(text=text)
     await call.message.edit_reply_markup()
     await state.set_state(ParamSearch.currency)
-    await call.message.answer(text=f'💵 <i>Выберите валюту.</i>', reply_markup=cur_car_kb)
+    await call.message.answer(text=fmt.hitalic('Выберите валюту.'), reply_markup=cur_car_kb)
     await call.answer()
 
 
@@ -69,12 +82,15 @@ async def currency_car(call: types.CallbackQuery, state: FSMContext):
 
     data = await state.get_data()
     currency = data.get('currency')
-    await call.message.answer(text=f'<i>Валюта: {currency}</i>\n\n'
-                                   f'<b>Для отмены поиска вызовите команду</b> /break')
+    text = fmt.text(
+        fmt.text(fmt.hitalic('Валюта: ', currency)),
+        fmt.text(fmt.hbold('/break '), fmt.hitalic('Для отмены поиска')),
+        sep='\n\n'
+    )
+    await call.message.answer(text=text)
     await call.message.edit_reply_markup()
     await state.set_state(ParamSearch.min_price)
-    await call.message.answer(text=f'💵 <i>Введите минимальную стоимость.</i>\n\n'
-                                   f'<b>Для отмены поиска вызовите команду</b> /break')
+    await call.message.answer(text=fmt.hitalic('💵 Введите минимальную стоимость.'))
     await call.answer()
 
 
@@ -84,11 +100,10 @@ async def car_price_start(message: types.Message, state: FSMContext):
 
         await state.set_state(ParamSearch.max_price)
 
-        await message.answer(text=f'💸 <i>Введите максимальную стоимость.</i>\n\n'
-                                  f'<b>Для отмены поиска вызовите команду</b> /break')
+        await message.answer(text=fmt.hitalic('💸 Введите максимальную стоимость.'))
 
     else:
-        await message.answer(text=f'<b>Введите целое число</b>')
+        await message.answer(text=fmt.hitalic('Введите целое число.'))
         await message.delete()
 
 
@@ -97,19 +112,24 @@ async def car_price_finish(message: types.Message, state: FSMContext):
     price_min = data.get('price_min')
 
     if not message.text.isdigit():
-        await message.answer(text=f'<b>Введите целое число.</b>')
+        await message.answer(text=fmt.hitalic('Введите целое число.'))
         await message.delete()
     if message.text.isdigit() and price_min > int(message.text):
-        await message.answer(text=f'<b>Максимальная стоимость должна привышать минимальную.</b>')
+        await message.answer(text=fmt.hitalic('Максимальная стоимость должна привышать минимальную.'))
         await message.delete()
     if message.text.isdigit() and price_min <= int(message.text):
         await state.update_data(price_max=int(message.text))
 
         await state.set_state(ParamSearch.tracking_date)
 
-        await message.answer(
-            text=f'📅<b><i>Введте дату в формате  ДД.ММ.ГГ ЧЧ:MM (например, {datetime.now().strftime("%d.%m.%y %H:%M")})</i></b>\n\n'
-                 f'<b>Для отмены поиска вызовите команду</b> /break')
+        text = fmt.text(
+            fmt.text(fmt.hitalic(f'Введите дату в формате  ДД.ММ.ГГ ЧЧ:MM '
+                                 f'(например, {datetime.now().strftime("%d.%m.%y %H:%M")})')),
+            fmt.text(fmt.hbold('/break '), fmt.hitalic('Для отмены поиска')),
+            sep='\n\n'
+        )
+
+        await message.answer(text=text)
 
 
 async def car_tracking_date(message: types.Message, state: FSMContext, session: AsyncSession):
@@ -117,30 +137,38 @@ async def car_tracking_date(message: types.Message, state: FSMContext, session: 
 
     try:
         date = str(datetime.strptime(tracking_date_str, '%d.%m.%y %H:%M'))
-    except Exception:
-        await message.answer(
-            text=f'📅<b><i>Введте дату в формате  ДД.ММ.ГГ ЧЧ:MM (например, {datetime.now().strftime("%d.%m.%y %H:%M")})</i></b>\n\n'
-                 f'<b>Для отмены поиска вызовите команду</b> /break')
+    except ValueError:
+        await message.answer(text=fmt.hitalic('Дата некорректна'))
     else:
         await state.update_data(tracking_date=date)
         await state.update_data(user_id=message.from_user.id)
 
         data = await state.get_data()
 
-        cars = 'Выбрано' if data.get("cars", False) else 'Не выбрано'
-        truck_cars = 'Выбрано' if data.get("truck_cars", False) else 'Не выбрано'
+        cars = data.get('join_cars')
         currency = data.get('currency')
-        await message.answer(f'<b>Критерии поиска:</b>\n'
-                             f'<i>Вы выбрали:</i>\n'
-                             f'<i>Лекговое авто - 🚗 <b>{cars}</b>\n</i>'
-                             f'<i>Грузовое авто - 🚚 <b>{truck_cars}</b>\n</i>'
-                             f'<i>Минимальная стоимость 💵 {data.get("price_min")} <b>{currency}</b></i>\n'
-                             f'<i>Максимальная стоимость 💸 {data.get("price_max")} <b>{currency}</b></i>\n'
-                             f'<i>Период публикации с 📅{data.get("tracking_date")}</i>\n'
-                             f'<b>Для получения результата вызовите команду</b> /get \n\n'
-                             f'<b>Для изменения параметров поиска вызовите команду</b> /begin\n'
-                             f'<b>Для отмены поиска вызовите команду</b> /break'
-                             )
+        price_min = data.get('price_min')
+        price_max = data.get('price_max')
+        tracking_date = data.get("tracking_date")
+
+        search = fmt.text(
+            fmt.text(fmt.hbold('Критерии поиска: ')),
+            fmt.text(fmt.hbold('Вы выбрали: ')),
+            fmt.text(fmt.hbold('Авто 🚗 '), fmt.hitalic(cars)),
+            fmt.text(fmt.hbold('Минимальная стоимость 💵 '), fmt.hitalic(price_min, currency)),
+            fmt.text(fmt.hbold('Максимальная стоимость 💵 '), fmt.hitalic(price_max, currency)),
+            fmt.text(fmt.hbold('Период публикации с 📅 '), fmt.hitalic(tracking_date)),
+            sep='\n'
+        )
+        commands = fmt.text(
+            fmt.text(fmt.hbold('Для получения результата '), fmt.hitalic('/get')),
+            fmt.text(fmt.hbold('Для изменения параметров '), fmt.hitalic('/begin')),
+            fmt.text(fmt.hbold('Для отмены поиска '), fmt.hitalic('/break')),
+            sep='\n\n'
+
+        )
+        await message.answer(text=search)
+        await message.answer(text=commands)
 
         # User table
         await OrmQuery.add_or_update_params(session=session, data=data)

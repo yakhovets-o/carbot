@@ -1,4 +1,5 @@
 import os
+import aiogram.utils.markdown as fmt
 
 from aiogram import types
 
@@ -12,43 +13,46 @@ async def start(message: types.Message) -> None:
     time_message_hour = (message.date.time().hour + 3) % 24
     time_of_day = {'Доброе утро': tuple(range(4, 12)), 'Добрый день': tuple(range(12, 17)),
                    'Добрый вечер': tuple(range(17, 24)), 'Доброй ночи': tuple(range(0, 4))}
+    text = fmt.text(
+        fmt.text(fmt.hbold(tuple(k for k, v in time_of_day.items() if time_message_hour in v)[0], your_name)),
+        fmt.text(fmt.hitalic('Для указания параметров поиска'), fmt.hbold('/begin')),
+        sep='\n\n'
 
-    text = f'{tuple(k for k, v in time_of_day.items() if time_message_hour in v)[0]} <b><i>{your_name}</i></b> ! \n' \
-           f'Для указания  параметров поиска вызовите команду /begin'
+    )
+
     await message.answer(text=text)
 
 
 async def contacts(message: types.Message) -> None:
-    await message.answer(text=f'<b>Admin:</b> {os.getenv("admin")}')
+    await message.answer(text=fmt.text(fmt.hitalic('Admin: '), fmt.hbold(os.getenv('admin'))))
 
 
 async def supports(message: types.Message) -> None:
-    await message.answer(text=f'<b>Поддержка бота:</b>  {os.getenv("support")}')
+    await message.answer(text=fmt.text(fmt.hitalic('Поддержка бота: '), fmt.hbold(os.getenv('support'))))
 
 
 async def sub(message: types.Message) -> None:
-    await message.answer(text=f'На данный момент подписка недоступна')
+    await message.answer(text=fmt.hitalic('На данный момент подписка недоступна'))
 
 
 async def helper(message: types.Message) -> None:
-    await message.answer(text=f'<b>Полный список команд:</b>\n'
-                              f'/start - <i>Запуск бота</i>\n'
-                              f'/contacts - <i>Контакты для связи</i>\n'
-                              f'/supports - <i>Написать в поддержку</i>\n'
-                              f'/sub - <i>оплата подписки</i>\n'
-                              f'/begin - <i>Параметры поиска</i>'
-                         )
+    commands = fmt.text(
+        fmt.text(fmt.hbold('Полный список команд: ')),
+        fmt.text(fmt.hbold('/start'), fmt.hitalic(' - Запуск бота')),
+        fmt.text(fmt.hbold('/contacts'), fmt.hitalic(' - Контакты для связи')),
+        fmt.text(fmt.hbold('/supports'), fmt.hitalic(' - Написать в поддержку')),
+        fmt.text(fmt.hbold('/sub'), fmt.hitalic(' - оплата подписки')),
+        fmt.text(fmt.hbold('/begin'), fmt.hitalic(' - Параметры поиска')),
+        fmt.text(fmt.hbold('/get'), fmt.hitalic(' - результат поиска')),
+        sep='\n'
+
+    )
+    await message.answer(text=commands)
 
 
 async def get(message: types.Message, arqredis: ArqRedis) -> None:
-    await message.answer('Пожалуйста подождите...')
+    await message.answer(text=fmt.hitalic('Пожалуйста подождите...'))
     tg_id = message.from_user.id
 
     # background task path  bot/scheduler
     await arqredis.enqueue_job('get', _defer_by=timedelta(seconds=5), tg_id=tg_id)
-
-
-async def mess_other(message: types.Message) -> None:
-    await message.answer(f'Команда некорректна\n'
-                         f'Список команд можно получить по команде \n/help')
-    await message.delete()

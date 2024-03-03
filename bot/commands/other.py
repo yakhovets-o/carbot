@@ -1,8 +1,13 @@
+import aiogram.utils.markdown as fmt
 from aiogram import types
 
 
 async def mess_other(message: types.Message):
-    await message.answer(f'Команда некорректна\n'
-                         f'Список команд можно получить по команде /help')
+    text = fmt.text(
+        fmt.text(fmt.hitalic('Команда некорректна: ')),
+        fmt.text(fmt.hitalic('Список команд: '), fmt.hbold('/help')),
+        sep='\n\n'
+    )
+    await message.answer(text=text)
 
     await message.delete()
