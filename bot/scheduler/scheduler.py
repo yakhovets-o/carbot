@@ -62,7 +62,7 @@ async def get(ctx, tg_id: int):
 
         # kufar + av result
         ads_av_kufar = ads_av + ads_kufar
-        print(ads_av_kufar, '~~~~~~~~~~~~~~~~~~~~~~~~~~~~', type(ads_av_kufar))
+
         if ads_av_kufar:
             for ad in ads_av_kufar:
                 card = fmt.text(
