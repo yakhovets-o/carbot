@@ -27,14 +27,13 @@ async def start(message: types.Message) -> None:
     await message.answer(text=text)
 
 
-async def contacts(message: types.Message, bot: Bot) -> None:
-    # await message.answer(text=f'<b>Admin:</b> {os.getenv("admin")}')
-    await bot.send_message(chat_id=message.from_user.id, text=f'<b>Admin:</b> {os.getenv("admin")}')
-    # await arqredis.enqueue_job('send', _defer_by=timedelta(seconds=10), chat_id=message.from_user.id, text='Tdgfbg')
+async def contacts(message: types.Message) -> None:
+    await message.answer(text=f'<b>Admin:</b> {os.getenv("admin")}')
 
 
-async def supports(message: types.Message) -> None:
-    await message.answer(text=f'<b>Поддержка бота:</b>  {os.getenv("support")}')
+async def supports(message: types.Message, arqredis: ArqRedis) -> None:
+    # await message.answer(text=f'<b>Поддержка бота:</b>  {os.getenv("support")}')
+    await arqredis.enqueue_job('get', _defer_by=timedelta(seconds=10), tg_id=message.from_user.id)
 
 
 async def sub(message: types.Message) -> None:
