@@ -18,7 +18,6 @@ class ParamSearch(StatesGroup):
     min_price = State()
     max_price = State()
     tracking_date = State()
-    update_period_min = State()
 
 
 async def param_search(message: types.Message, state: FSMContext):
@@ -112,7 +111,7 @@ async def car_price_finish(message: types.Message, state: FSMContext):
                  f'<b>Для отмены поиска вызовите команду</b> /break')
 
 
-async def car_tracking_date(message: types.Message, state: FSMContext):
+async def car_tracking_date(message: types.Message, state: FSMContext, session: AsyncSession):
     tracking_date_str = message.text
 
     try:
@@ -123,19 +122,6 @@ async def car_tracking_date(message: types.Message, state: FSMContext):
                  f'<b>Для отмены поиска вызовите команду</b> /break')
     else:
         await state.update_data(tracking_date=date)
-        await state.set_state(ParamSearch.update_period_min)
-
-        await message.answer(text=f'⏰ <b><i>Укажите период  обновления  в минутах</i></b>\n\n'
-                                  f'<b>Для отмены поиска вызовите команду</b> /break')
-
-
-async def update_period_min(message: types.Message, state: FSMContext, session: AsyncSession):
-    if not message.text.isdigit():
-        await message.answer(f'<b>Введите целое число</b>')
-        await message.delete()
-
-    else:
-        await state.update_data(update_period_min=int(message.text))
         await state.update_data(user_id=message.from_user.id)
 
         data = await state.get_data()
@@ -151,7 +137,6 @@ async def update_period_min(message: types.Message, state: FSMContext, session: 
                              f'<i>Минимальная стоимость 💵 {data.get("price_min")} <b>{currency}</b></i>\n'
                              f'<i>Максимальная стоимость 💸 {data.get("price_max")} <b>{currency}</b></i>\n'
                              f'<i>Период публикации с 📅{data.get("tracking_date")}</i>\n'
-                             f'<i>Период обновления ⏰ {data.get("update_period_min")} <b>min</b></i>\n\n'
                              f'<b>Для получения результата вызовите команду</b> /get \n\n'
                              f'<b>Для изменения параметров поиска вызовите команду</b> /begin\n'
                              f'<b>Для отмены поиска вызовите команду</b> /break'

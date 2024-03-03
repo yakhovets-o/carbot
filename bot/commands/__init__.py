@@ -7,8 +7,7 @@ from bot.commands.client import start, contacts, supports, helper, sub, get
 
 from bot.commands.clientfsm import (ParamSearch, param_search, car_cancel,
                                     car_message, car_choice, car_price_start,
-                                    car_price_finish, update_period_min,
-                                    currency_car, car_tracking_date)
+                                    car_price_finish, currency_car, car_tracking_date)
 
 from bot.commands.other import mess_other
 
@@ -39,8 +38,6 @@ def register_client_command_fsm(router: Router) -> None:
     router.message.register(car_price_finish, StateFilter(ParamSearch.max_price))
 
     router.message.register(car_tracking_date, StateFilter(ParamSearch.tracking_date))
-
-    router.message.register(update_period_min, StateFilter(ParamSearch.update_period_min))
 
 
 def register_client_command_other(router: Router) -> None:
