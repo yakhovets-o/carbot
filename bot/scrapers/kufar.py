@@ -48,7 +48,6 @@ class Kufar(DataClass):
             async with session.get(url=page_url, headers=self.HEADERS) as response:
                 ads = await response.json()
                 await asyncio.sleep(1)
-                print(response.url)
 
                 for ad in ads['ads']:
 
@@ -62,8 +61,6 @@ class Kufar(DataClass):
                         properties |= {'link': ad['ad_link'], 'date_time_ad': date_ad, 'price_usd': price_usd,
                                        'price_br': price_br, 'tg_id': self.tg_id}
 
-                        print(properties, sep='\n')
-                        print('-----------------------------------------')
                         # table kufar
                         await OrmQuery.add_kufar_ads(data=properties)
                     else:

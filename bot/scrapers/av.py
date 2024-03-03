@@ -1,4 +1,3 @@
-import time
 import datetime
 
 import asyncio
@@ -8,9 +7,6 @@ from typing import NoReturn
 
 from bot.scrapers.abc_data_class_scraper import AbcDataClassScraper as DataClass
 from bot.db.orm_query import OrmQuery
-
-
-# start = time.perf_counter()
 
 
 class Av(DataClass):
@@ -37,7 +33,6 @@ class Av(DataClass):
             async with session.get(url=page_url, headers=self.HEADERS) as response:
                 ads = await response.json()
                 await asyncio.sleep(1)
-                print(response.url)
 
                 for ad in ads['adverts']:
                     date_ad = await self._get_date_ad(ad['refreshedAt'])
@@ -47,10 +42,10 @@ class Av(DataClass):
                                        'price_br': ad['price']['byn']['amount'], 'date_time_ad': date_ad,
                                        'price_usd': ad['price']['usd']['amount'], 'link': ad['publicUrl'],
                                        'tg_id': self.tg_id}
-                        print(properties, sep='\n')
-                        print('-------------------------------------------------------------------------------')
+
                         # av table
                         await OrmQuery.add_av_ads(data=properties)
+
                     else:
                         continue
         except aiohttp.ClientConnectionError as cce:
@@ -82,12 +77,3 @@ class Av(DataClass):
             raise cce
         except Exception as ex:
             raise ex
-
-# av = Av()
-# asyncio.run(av._create_task())
-#
-# finish = time.perf_counter()
-#
-# print(finish - start)
-#
-# # 3.6007565000327304
