@@ -20,6 +20,7 @@ fake-useragent = "^1.4.0"
 arq = "^0.25.0"
 alembic = "^1.13.1"
 black = "^24.2.0"
+apscheduler = "^3.10.4"
 
 
 [build-system]

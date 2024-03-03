@@ -26,7 +26,6 @@ class User(Base):
     currency: Mapped[str] = mapped_column(default='Usd')
     price_min: Mapped[int] = mapped_column(default=0)
     price_max: Mapped[int]
-    update_period_min: Mapped[int] = mapped_column(default=10)
     tracking_date: Mapped[str]
 
     __av: Mapped['Av'] = relationship(backref='user')

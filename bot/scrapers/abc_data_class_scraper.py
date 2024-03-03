@@ -14,7 +14,6 @@ class AbcDataClassScraper(ABC):
     currency: str
     price_min: int
     price_max: int
-    update_period_min: int
     tracking_date: str
 
     type_cars: set = field(init=False, repr=False)

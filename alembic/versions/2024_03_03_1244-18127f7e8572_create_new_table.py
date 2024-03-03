@@ -1,8 +1,8 @@
-"""Crete new tables
+"""Create new table
 
-Revision ID: 22ad7d0d66db
+Revision ID: 18127f7e8572
 Revises: 
-Create Date: 2024-03-02 17:55:03.086495
+Create Date: 2024-03-03 12:44:24.074333
 
 """
 
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "22ad7d0d66db"
+revision: str = "18127f7e8572"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -29,7 +29,6 @@ def upgrade() -> None:
         sa.Column("currency", sa.String(), nullable=False),
         sa.Column("price_min", sa.Integer(), nullable=False),
         sa.Column("price_max", sa.Integer(), nullable=False),
-        sa.Column("update_period_min", sa.Integer(), nullable=False),
         sa.Column("tracking_date", sa.String(), nullable=False),
         sa.PrimaryKeyConstraint("tg_id"),
         sa.UniqueConstraint("tg_id"),
