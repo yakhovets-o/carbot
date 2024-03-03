@@ -26,8 +26,10 @@ async def main() -> None:
 
     redis_pool = await create_pool(RedisSettings())
     await create_db()
+
     await bot.set_my_commands(commands=bot_cmd_lst, scope=BotCommandScopeAllPrivateChats())
     await bot.delete_webhook(drop_pending_updates=True)
+
     await dp.start_polling(bot, arqredis=redis_pool)
 
 
