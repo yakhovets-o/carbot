@@ -73,7 +73,8 @@ async def currency_car(call: types.CallbackQuery, state: FSMContext):
                                    f'<b>Для отмены поиска вызовите команду</b> /break')
     await call.message.edit_reply_markup()
     await state.set_state(ParamSearch.min_price)
-    await call.message.answer(text=f'💵 <i>Введите минимальную стоимость.</i>')
+    await call.message.answer(text=f'💵 <i>Введите минимальную стоимость.</i>\n\n'
+                                   f'<b>Для отмены поиска вызовите команду</b> /break')
     await call.answer()
 
 

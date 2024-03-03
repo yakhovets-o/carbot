@@ -14,7 +14,7 @@ from bot.scrapers.kufar import Kufar
 
 from arq import ArqRedis
 from datetime import timedelta
-
+import aiogram.utils.markdown as fmt
 
 async def start(message: types.Message) -> None:
     your_name = message.from_user.full_name
@@ -31,9 +31,8 @@ async def contacts(message: types.Message) -> None:
     await message.answer(text=f'<b>Admin:</b> {os.getenv("admin")}')
 
 
-async def supports(message: types.Message, arqredis: ArqRedis) -> None:
-    # await message.answer(text=f'<b>Поддержка бота:</b>  {os.getenv("support")}')
-    await arqredis.enqueue_job('get', _defer_by=timedelta(seconds=10), tg_id=message.from_user.id)
+async def supports(message: types.Message) -> None:
+    await message.answer(text=f'<b>Поддержка бота:</b>  {os.getenv("support")}')
 
 
 async def sub(message: types.Message) -> None:
@@ -50,72 +49,11 @@ async def helper(message: types.Message) -> None:
                          )
 
 
-async def get(message: types.Message, session: AsyncSession):
+async def get(message: types.Message, arqredis: ArqRedis) -> None:
     await message.answer('Пожалуйста подождите...')
     tg_id = message.from_user.id
 
-    params_value: User = await OrmQuery.get_params_user(session=session, tg_id=tg_id)
-
-    if params_value is None:
-        await message.answer('Для получения результатов, укажите критерии поиска')
-    else:
-        # create av obj scraper
-        # av = Av(params_value.tg_id,
-        #         params_value.cars,
-        #         params_value.truck_cars,
-        #         params_value.currency,
-        #         params_value.price_min,
-        #         params_value.price_max,
-        #         params_value.update_period_min,
-        #         params_value.tracking_date
-        #         )
-        # # start av scraper
-        # await av.create_task()
-        # result av scraper
-        ads_av = await OrmQuery.get_ads_av(session=session, tg_id=tg_id)
-
-        # create kufar obj scraper
-        # kufar = Kufar(params_value.tg_id,
-        #               params_value.cars,
-        #               params_value.truck_cars,
-        #               params_value.currency,
-        #               params_value.price_min,
-        #               params_value.price_max,
-        #               params_value.update_period_min,
-        #               params_value.tracking_date
-        #               )
-        # # start kufar scraper
-        # await kufar.create_task()
-
-        # result kufar scraper
-        ads_kufar = await OrmQuery.get_ads_kufar(session=session, tg_id=tg_id)
-
-        # kufar + av result
-        ads_av_kufar = ads_av + ads_kufar
-        print(ads_av_kufar, '~~~~~~~~~~~~~~~~~~~~~~~~~~~~', type(ads_av_kufar))
-        if ads_av_kufar:
-            for ad in ads_av_kufar:
-                card = f'{hbold("Марка и модель: ")} {hlink((ad.brand + " " + ad.model), ad.link)}\n' \
-                       f'{hbold("Состояние: ")} {ad.condition}\n' \
-                       f'{hbold("Год: ")} {ad.year}\n' \
-                       f'{hbold("Тип двигателя и объем: ")} {ad.engine_type}, {ad.engine_capacity}\n' \
-                       f'{hbold("Дата и место публикации: ")} {ad.date_time_ad}, {ad.region}, {ad.city}\n' \
-                       f'{hbold("Цена: ")} Br {ad.price_br}, Usd {ad.price_usd}'
-
-                await asyncio.sleep(1)
-                await message.answer(card)
-            await message.answer('Поиск завершен.')
-
-            # del av table
-            await OrmQuery.dell_ads_av(session=session, tg_id=tg_id)
-            # del kufar table
-            await OrmQuery.dell_ads_kufar(session=session, tg_id=tg_id)
-            # update search parameters
-            await OrmQuery.update_period_user(session=session, tg_id=tg_id)
-
-        else:
-            await message.answer('По вашему запросу объявлений не обнаружено.\n'
-                                 'Обновите параметры поиска командой \n/begin')
+    await arqredis.enqueue_job('get', _defer_by=timedelta(seconds=10), tg_id=tg_id)
 
 
 async def mess_other(message: types.Message) -> None:
