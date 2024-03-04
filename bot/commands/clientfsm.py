@@ -38,7 +38,7 @@ async def car_cancel(message: types.Message, state: FSMContext):
 async def car_message(message: types.Message):
     text = fmt.text(
         fmt.text(fmt.hitalic('Укажите что то из предложенных вариантов')),
-        fmt.text(fmt.hbold('/break '), fmt.hitalic('Для отмены поиска')),
+        fmt.text(fmt.hbold('/break '), fmt.hitalic('Отмена поиска')),
         sep='\n\n'
     )
     await message.answer(text=text)
@@ -46,12 +46,12 @@ async def car_message(message: types.Message):
 
 
 async def car_choice(call: types.CallbackQuery, state: FSMContext):
-    if call.data == 'Лекговое авто':
+    if call.data == 'Легковое авто':
         await state.update_data(cars=True)
     if call.data == 'Грузовое авто':
         await state.update_data(truck_cars=True)
 
-    if call.data == 'Лекговое авто / Грузовое авто':
+    if call.data == 'Легковое авто / Грузовое авто':
         await state.update_data(cars=True)
         await state.update_data(truck_cars=True)
 
@@ -64,7 +64,7 @@ async def car_choice(call: types.CallbackQuery, state: FSMContext):
 
     text = fmt.text(
         fmt.text(fmt.hitalic('Авто: ', data.get('join_cars'))),
-        fmt.text(fmt.hbold('/break '), fmt.hitalic('Для отмены поиска')),
+        fmt.text(fmt.hbold('/break '), fmt.hitalic('Отмена поиска')),
         sep='\n\n'
     )
     await call.message.answer(text=text)
@@ -84,7 +84,7 @@ async def currency_car(call: types.CallbackQuery, state: FSMContext):
     currency = data.get('currency')
     text = fmt.text(
         fmt.text(fmt.hitalic('Валюта: ', currency)),
-        fmt.text(fmt.hbold('/break '), fmt.hitalic('Для отмены поиска')),
+        fmt.text(fmt.hbold('/break '), fmt.hitalic('Отмена поиска')),
         sep='\n\n'
     )
     await call.message.answer(text=text)
@@ -115,7 +115,7 @@ async def car_price_finish(message: types.Message, state: FSMContext):
         await message.answer(text=fmt.hitalic('Введите целое число.'))
         await message.delete()
     if message.text.isdigit() and price_min > int(message.text):
-        await message.answer(text=fmt.hitalic('Максимальная стоимость должна привышать минимальную.'))
+        await message.answer(text=fmt.hitalic('Максимальная стоимость должна превышать минимальную.'))
         await message.delete()
     if message.text.isdigit() and price_min <= int(message.text):
         await state.update_data(price_max=int(message.text))
@@ -125,7 +125,7 @@ async def car_price_finish(message: types.Message, state: FSMContext):
         text = fmt.text(
             fmt.text(fmt.hitalic(f'Введите дату в формате  ДД.ММ.ГГ ЧЧ:MM '
                                  f'(например, {datetime.now().strftime("%d.%m.%y %H:%M")})')),
-            fmt.text(fmt.hbold('/break '), fmt.hitalic('Для отмены поиска')),
+            fmt.text(fmt.hbold('/break '), fmt.hitalic('Отмена поиска')),
             sep='\n\n'
         )
 
@@ -161,9 +161,8 @@ async def car_tracking_date(message: types.Message, state: FSMContext, session: 
             sep='\n'
         )
         commands = fmt.text(
-            fmt.text(fmt.hbold('Для получения результата '), fmt.hitalic('/get')),
-            fmt.text(fmt.hbold('Для изменения параметров '), fmt.hitalic('/begin')),
-            fmt.text(fmt.hbold('Для отмены поиска '), fmt.hitalic('/break')),
+            fmt.text(fmt.hitalic('/get'), fmt.hbold(' Получение результата')),
+            fmt.text(fmt.hitalic('/begin'), fmt.hbold(' Изменение параметров')),
             sep='\n\n'
 
         )
