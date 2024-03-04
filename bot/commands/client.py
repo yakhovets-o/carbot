@@ -75,8 +75,9 @@ async def helper(message: types.Message) -> None:
         fmt.text(fmt.hbold('/contacts'), fmt.hitalic(' - Контакты для связи')),
         fmt.text(fmt.hbold('/supports'), fmt.hitalic(' - Написать в поддержку')),
         fmt.text(fmt.hbold('/sub'), fmt.hitalic(' - Оплата подписки')),
-        fmt.text(fmt.hbold('/begin'), fmt.hitalic(' - Параметры поиска')),
+        fmt.text(fmt.hbold('/begin'), fmt.hitalic(' - Установить параметры поиска')),
         fmt.text(fmt.hbold('/get'), fmt.hitalic(' - Результат поиска')),
+        fmt.text(fmt.hbold('/params'), fmt.hitalic(' - Получить параметры поиска')),
         sep='\n'
 
     )
