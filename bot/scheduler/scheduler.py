@@ -26,7 +26,7 @@ async def get(ctx, tg_id: int):
     params_value = await OrmQuery.get_params_user(tg_id=tg_id)
 
     if params_value is None:
-        await bot.send_message(tg_id, text='Для получения результатов, укажите критерии поиска')
+        await bot.send_message(tg_id, text=fmt.hitalic('Для получения результатов, укажите критерии поиска'))
 
     else:
         # create av obj scraper
@@ -66,17 +66,17 @@ async def get(ctx, tg_id: int):
             for ad in ads_av_kufar:
                 card = fmt.text(
                     fmt.text(fmt.hbold('Марка и модель: '), fmt.hlink((ad.brand + ' ' + ad.model), ad.link)),
-                    fmt.text(fmt.hbold('Состояние: '), ad.condition),
-                    fmt.text(fmt.hbold('Год: '), ad.year),
-                    fmt.text(fmt.hbold('Тип двигателя и объем: '), ad.engine_type, ad.engine_capacity),
-                    fmt.text(fmt.hbold('Дата и место публикации: '), ad.date_time_ad, ad.region, ad.city),
-                    fmt.text(fmt.hbold('Цена: '), 'Br', ad.price_br, 'Usd', ad.price_usd),
+                    fmt.text(fmt.hbold('Состояние: '), fmt.hitalic(ad.condition)),
+                    fmt.text(fmt.hbold('Год: '), fmt.hitalic(ad.year)),
+                    fmt.text(fmt.hbold('Тип двигателя и объем: '), fmt.hitalic(ad.engine_type, ad.engine_capacity)),
+                    fmt.text(fmt.hbold('Дата и место публикации: '), fmt.hitalic(ad.date_time_ad, ad.region, ad.city)),
+                    fmt.text(fmt.hbold('Цена: '), 'Br', fmt.hitalic(ad.price_br), 'Usd', fmt.hitalic(ad.price_usd)),
                     sep='\n'
                 )
                 await asyncio.sleep(1)
                 await bot.send_message(tg_id, text=card, parse_mode='HTML')
 
-            await bot.send_message(tg_id, text=fmt.hitalic('Поиск завершен.'))
+            await bot.send_message(tg_id, text=fmt.hitalic('Поиск завершен.'), parse_mode='HTML')
 
             # del av table
             await OrmQuery.dell_ads_av(tg_id=tg_id)
@@ -88,7 +88,7 @@ async def get(ctx, tg_id: int):
         else:
             await bot.send_message(tg_id, text=fmt.text(
                 fmt.text(fmt.hitalic('По вашему запросу объявлений не обнаружено.')),
-                fmt.text(fmt.hitalic('Обновите параметры поиска командой'), fmt.hbold(' /begin')),
+                fmt.text(fmt.hitalic('Для обновления параметров поиска'), fmt.hbold(' /begin')),
                 sep='\n\n'
             ), parse_mode='HTML'
                                    )
