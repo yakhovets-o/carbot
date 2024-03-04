@@ -6,7 +6,6 @@ from aiogram.types import BotCommandScopeAllPrivateChats
 from arq import create_pool
 from arq.connections import RedisSettings
 
-
 from bot.db.engine import create_db, session_maker
 from bot.commands import register_client_command, register_client_command_fsm, register_client_command_other
 from bot.middlewares.db import DataBaseSession
@@ -15,8 +14,7 @@ from bot.common.bot_cmd_lst import bot_cmd_lst
 
 
 async def main() -> None:
-
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG, format='[%(asctime)s] [%(name)s] [%(levelname)s] > %(message)s')
 
     register_client_command(dp)
     register_client_command_fsm(dp)
