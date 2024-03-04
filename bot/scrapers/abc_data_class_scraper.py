@@ -1,5 +1,3 @@
-import datetime
-
 from fake_useragent import UserAgent
 
 from dataclasses import dataclass, field
@@ -77,6 +75,3 @@ class AbcDataClassScraper(ABC):
     @abstractmethod
     def create_task(self) -> NotImplemented:
         raise NotImplementedError('the _create_task method is not defined in the class')
-
-
-
