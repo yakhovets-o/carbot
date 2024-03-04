@@ -22,7 +22,8 @@ alembic = "^1.13.1"
 black = "^24.2.0"
 apscheduler = "^3.10.4"
 
-
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+
