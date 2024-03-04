@@ -3,7 +3,7 @@ __all__ = ['register_client_command', 'register_client_command_fsm', 'register_c
 from aiogram import Router, F
 from aiogram.filters import CommandStart, Command, StateFilter
 
-from bot.commands.client import start, contacts, supports, helper, sub, get
+from bot.commands.client import start, contacts, supports, helper, sub, get, params
 
 from bot.commands.clientfsm import (ParamSearch, param_search, car_cancel,
                                     car_message, car_choice, car_price_start,
@@ -14,6 +14,7 @@ from bot.commands.other import mess_other
 
 def register_client_command(router: Router) -> None:
     router.message.register(start, CommandStart())
+    router.message.register(params, Command('params'))
     router.message.register(contacts, Command('contacts'))
     router.message.register(supports, Command('supports'))
     router.message.register(sub, Command('sub'))

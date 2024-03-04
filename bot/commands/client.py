@@ -7,6 +7,8 @@ from arq import ArqRedis
 
 from datetime import timedelta
 
+from bot.db.orm_query import OrmQuery
+
 
 async def start(message: types.Message) -> None:
     your_name = message.from_user.full_name
@@ -21,6 +23,37 @@ async def start(message: types.Message) -> None:
     )
 
     await message.answer(text=text)
+
+
+async def get(message: types.Message, arqredis: ArqRedis) -> None:
+    await message.answer(text=fmt.hitalic('Пожалуйста подождите...'))
+    tg_id = message.from_user.id
+
+    # background task path  bot/scheduler
+    await arqredis.enqueue_job('get', _defer_by=timedelta(seconds=5), tg_id=tg_id)
+
+
+async def params(message: types.Message) -> None:
+    tg_id = message.from_user.id
+
+    # get params for scraper User table
+    params_value = await OrmQuery.get_params_user(tg_id=tg_id)
+    if params_value is None:
+        await message.answer(text=fmt.hitalic('Для получения результатов, укажите критерии поиска'))
+        await message.answer(text=fmt.text(fmt.hitalic('Параметры поиска'), fmt.hbold(' /begin')))
+    else:
+        type_cars = f"{'Легковое' if params_value.cars else 'Грузовое' if params_value.truck_cars else 'Легковое'}"
+        text = fmt.text(
+            fmt.text(fmt.hbold('Тип: '), fmt.hitalic(type_cars, 'авто')),
+            fmt.text(fmt.hbold('Минимальная стоимость: '), fmt.hitalic(params_value.price_min)),
+            fmt.text(fmt.hbold('Максимальная стоимость: '), fmt.hitalic(params_value.price_max)),
+            fmt.text(fmt.hbold('Период публикации: '), fmt.hitalic(params_value.tracking_date)),
+            sep='\n'
+
+        )
+
+        await message.answer(text=text)
+        await message.answer(text=fmt.text(fmt.hitalic('Параметры поиска'), fmt.hbold(' /begin')))
 
 
 async def contacts(message: types.Message) -> None:
@@ -41,18 +74,10 @@ async def helper(message: types.Message) -> None:
         fmt.text(fmt.hbold('/start'), fmt.hitalic(' - Запуск бота')),
         fmt.text(fmt.hbold('/contacts'), fmt.hitalic(' - Контакты для связи')),
         fmt.text(fmt.hbold('/supports'), fmt.hitalic(' - Написать в поддержку')),
-        fmt.text(fmt.hbold('/sub'), fmt.hitalic(' - оплата подписки')),
+        fmt.text(fmt.hbold('/sub'), fmt.hitalic(' - Оплата подписки')),
         fmt.text(fmt.hbold('/begin'), fmt.hitalic(' - Параметры поиска')),
-        fmt.text(fmt.hbold('/get'), fmt.hitalic(' - результат поиска')),
+        fmt.text(fmt.hbold('/get'), fmt.hitalic(' - Результат поиска')),
         sep='\n'
 
     )
     await message.answer(text=commands)
-
-
-async def get(message: types.Message, arqredis: ArqRedis) -> None:
-    await message.answer(text=fmt.hitalic('Пожалуйста подождите...'))
-    tg_id = message.from_user.id
-
-    # background task path  bot/scheduler
-    await arqredis.enqueue_job('get', _defer_by=timedelta(seconds=5), tg_id=tg_id)
