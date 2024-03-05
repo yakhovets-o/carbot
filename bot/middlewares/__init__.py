@@ -1,3 +1,3 @@
-__all__ = ['DataBaseSession']
+__all__ = ["DataBaseSession"]
 
 from bot.middlewares.db import DataBaseSession
