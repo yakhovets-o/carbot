@@ -46,19 +46,21 @@ async def car_message(message: types.Message):
 
 
 async def car_choice(call: types.CallbackQuery, state: FSMContext):
-    if call.data == 'Легковое авто':
-        await state.update_data(cars=True)
-    if call.data == 'Грузовое авто':
-        await state.update_data(truck_cars=True)
-
     if call.data == 'Легковое авто / Грузовое авто':
         await state.update_data(cars=True)
+        await state.update_data(truck_cars=True)
+
+    if call.data == 'Легковое авто':
+        await state.update_data(cars=True)
+
+    if call.data == 'Грузовое авто':
         await state.update_data(truck_cars=True)
 
     data = await state.get_data()
     car = 'Легкое авто' if data.get("cars", False) else 'Грузовое авто'
     truck_car = 'Грузовое авто' if data.get("truck_cars", False) else 'Легкое авто'
     join_cars = ', '.join({car, truck_car})
+
     await state.update_data(join_cars=join_cars)
     data = await state.get_data()
 
