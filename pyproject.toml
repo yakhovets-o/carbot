@@ -1,9 +1,10 @@
 [tool.poetry]
-name = "carbot"
+name = "bot"
 version = "1.0.0"
 description = ""
 authors = ["yakhovets-o <yakhovetso@gmail.com>"]
 readme = "README.md"
+
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -25,5 +26,6 @@ apscheduler = "^3.10.4"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
 
 
