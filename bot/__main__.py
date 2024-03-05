@@ -1,5 +1,4 @@
 import asyncio
-import logging
 
 from aiogram.types import BotCommandScopeAllPrivateChats
 
@@ -12,10 +11,15 @@ from bot.middlewares.db import DataBaseSession
 from bot.config import bot, dp
 from bot.common.bot_cmd_lst import bot_cmd_lst
 
+import logging.config
+from bot.logger_conf.logger_conf import get_logg_conf
+
+logging.config.dictConfig(get_logg_conf())
+
+loger = logging.getLogger(__name__)
+
 
 async def main() -> None:
-    logging.basicConfig(level=logging.DEBUG, format='[%(asctime)s] [%(name)s] [%(levelname)s] > %(message)s')
-
     register_client_command(dp)
     register_client_command_fsm(dp)
     register_client_command_other(dp)
