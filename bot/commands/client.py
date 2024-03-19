@@ -1,10 +1,10 @@
-import os
 from datetime import timedelta
 
 import aiogram.utils.markdown as fmt
 from aiogram import types
 from arq import ArqRedis
 
+from bot.config import HelpConfig
 from bot.db.orm_query import OrmQuery
 
 
@@ -71,11 +71,11 @@ async def params(message: types.Message) -> None:
 
 
 async def contacts(message: types.Message) -> None:
-    await message.answer(text=fmt.text(fmt.hitalic("Admin: "), fmt.hbold(os.getenv("admin"))))
+    await message.answer(text=fmt.text(fmt.hitalic("Admin: "), fmt.hbold(HelpConfig.admin)))
 
 
 async def supports(message: types.Message) -> None:
-    await message.answer(text=fmt.text(fmt.hitalic("Поддержка бота: "), fmt.hbold(os.getenv("support"))))
+    await message.answer(text=fmt.text(fmt.hitalic("Поддержка бота: "), fmt.hbold(HelpConfig.support)))
 
 
 async def sub(message: types.Message) -> None:
