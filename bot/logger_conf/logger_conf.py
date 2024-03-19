@@ -6,7 +6,7 @@ def get_logg_conf() -> dict:
             "fileHandler": {
                 "class": "logging.FileHandler",
                 "formatter": "myFormatter",
-                "filename": "logger_conf/loggers.log",
+                "filename": "bot/logger_conf/loggers.log",
                 "encoding": "utf-8",
                 "mode": "w",
                 "level": "INFO",
